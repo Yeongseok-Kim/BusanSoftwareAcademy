@@ -39,15 +39,15 @@ def input_account_number(account_dictionary):
 
 def account_deposit(account_dictionary): #입금
     account_number=input_account_number(account_dictionary)
-    account_dictionary=renew_price(account_dictionary,account_number)
     account_price=float(input("입금:"))
+    account_dictionary=renew_price(account_dictionary,account_number)
     account_dictionary[account_number][0]+=account_price
     return account_dictionary
 
 def account_withdraw(account_dictionary): #출금
     account_number=input_account_number(account_dictionary)
-    account_dictionary=renew_price(account_dictionary,account_number)
     account_price=float(input("출금:"))
+    account_dictionary=renew_price(account_dictionary,account_number)
     account_dictionary[account_number][0]-=account_price
     return account_dictionary
 
@@ -74,14 +74,14 @@ def account_loan_lookup(account_dictionary,account_number):
     print("대출:"+str(account_dictionary[account_number][1]))
 
 def account_loan(account_dictionary,account_number):
-    account_dictionary=renew_loan(account_dictionary,account_number)
     account_price=float(input("대출:"))
+    account_dictionary=renew_loan(account_dictionary,account_number)
     account_dictionary[account_number][1]+=account_price
     return account_dictionary
 
 def account_loan_repayment(account_dictionary,account_number):
-    account_dictionary=renew_loan(account_dictionary,account_number)
     account_price=float(input("상환:"))
+    account_dictionary=renew_loan(account_dictionary,account_number)
     account_dictionary[account_number][1]-=account_price
     return account_dictionary
 
