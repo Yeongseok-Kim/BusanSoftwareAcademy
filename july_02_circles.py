@@ -2,52 +2,34 @@ import torch
 import random
 from matplotlib import pyplot
 
-X=[]
-Y=[]
+def make_circle(center_x,center_y,r):
+    point_list=[]
+    for _ in range(100):
+        while True:
+            x=random.uniform(center_x-r,center_x+r)
+            y=random.uniform(center_y-r,center_y+r)
+            if (x-center_x)**2+(y-center_y)**2<=r**2:
+                break
+        point_list.append([x,y])
+    return point_list
 
-for _ in range(100):
-    while True:
-        x=random.uniform(-2.0,4.0)
-        y=random.uniform(-2.0,4.0)
-        if (x-1)**2+(y-1)**2<=9:
-            break
-    X.append([x])
-    Y.append([y])
+def make_graph_x(circle_list):
+    graph_x=[]
+    for i in circle_list:
+        graph_x.append(i[0])
+    return graph_x
 
-x_tranin1=torch.FloatTensor(X)
-y_tranin1=torch.FloatTensor(Y)
+def make_graph_y(circle_list):
+    graph_y=[]
+    for i in circle_list:
+        graph_y.append(i[1])
+    return graph_y
 
-X=[]
-Y=[]
+circle0=make_circle(1.0,1.0,3.0)
+circle1=make_circle(4.0,4.0,3.0)+make_circle(-4.0,4.0,3.0)
 
-for _ in range(100):
-    while True:
-        x=random.uniform(1.0,7.0)
-        y=random.uniform(1.0,7.0)
-        if (x-4)**2+(y-4)**2<=9:
-            break
-    X.append([x])
-    Y.append([y])
-
-for _ in range(100):
-    while True:
-        x=random.uniform(-7.0,-1.0)
-        y=random.uniform(1.0,7.0)
-        if (x+4)**2+(y-4)**2<=9:
-            break
-    X.append([x])
-    Y.append([y])
-
-x_tranin2=torch.FloatTensor(X)
-y_tranin2=torch.FloatTensor(Y)
-
-data_input1=torch.cat([x_tranin1,y_tranin1],dim=1)
-data_input2=torch.cat([x_tranin2,y_tranin2],dim=1)
-data_input=torch.cat([data_input1,data_input2],dim=0)
-
-output=[[0] for _ in range(100)]+[[1] for _ in range(200)]
-
-data_output=torch.FloatTensor(output)
+data_input=torch.FloatTensor(circle0+circle1)
+data_result=torch.FloatTensor([[0] for _ in range(100)]+[[1] for _ in range(200)])
 
 linear1=torch.nn.Linear(2,2,bias=True)
 linear2=torch.nn.Linear(2,1,bias=True)
@@ -62,7 +44,7 @@ for step in range(10001):
     optimizer.zero_grad()
     hypothesis=model(data_input)
 
-    cost=criterion(hypothesis,data_output)
+    cost=criterion(hypothesis,data_result)
     cost.backward()
     optimizer.step()
 
@@ -70,9 +52,11 @@ for step in range(10001):
         print(step,cost.item())
 
         with torch.no_grad():
-            predicted=model(torch.FloatTensor([4,4]))
-            print(predicted)
+            test_point=[[4.0,4.0],[5.0,5.0],[-1.0,-2.0],[-5.0,-5.0]]
+            for point in test_point:
+                predicted=model(torch.FloatTensor(point))
+                print(predicted)
 
-pyplot.scatter(x_tranin1,y_tranin1)
-pyplot.scatter(x_tranin2,y_tranin2)
+pyplot.scatter(make_graph_x(circle0),make_graph_y(circle0))
+pyplot.scatter(make_graph_x(circle1),make_graph_y(circle1))
 pyplot.show()
