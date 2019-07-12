@@ -81,6 +81,10 @@ for epoch in range(training_epochs):
     
     print('[Epoch: {:>4}] cost={:>.9}'.format(epoch+1,avg_cost))
 
+    # 학습 데이터 저장
+
+    torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch))
+
 print('Learning Finished!')
 
 # 테스트
