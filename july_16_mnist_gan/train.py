@@ -7,8 +7,12 @@ import data_loader
 
 import model
 
+# 디바이스 식별
+
+device='cuda' if torch.cuda.is_available() else 'cpu'
+
 if __name__=='__main__':
-    batch_size=100
+    batch_size=64
     
     # 트레이닝 데이터 로드
 
@@ -17,11 +21,11 @@ if __name__=='__main__':
 
     # 트레이닝
 
-    learning_rate=0.001
-    training_epochs=10
+    learning_rate=0.0002
+    training_epochs=80
 
-    d_net=model.Discriminator()
-    g_net=model.Generator()
+    d_net=model.Discriminator().to(device)
+    g_net=model.Generator().to(device)
 
     criterion=nn.BCELoss()
     
@@ -32,6 +36,9 @@ if __name__=='__main__':
 
     for epoch in range(training_epochs):
         for X,Y in train_set:
+            X=X.to(device)
+            Y=Y.to(device)
+
             d_optimizer.zero_grad()
             g_optimizer.zero_grad()
 
@@ -47,9 +54,6 @@ if __name__=='__main__':
             d_cost.backward()
             d_optimizer.step()
 
-            z=torch.randn(batch_size,64)
-            fake_images=g_net(z)
-            hypothesis=d_net(fake_images)
             g_cost=criterion(hypothesis,Y)
             g_cost.backward()
             g_optimizer.step()
