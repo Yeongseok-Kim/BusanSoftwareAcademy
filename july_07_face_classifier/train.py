@@ -9,13 +9,9 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as dsets
 
-from matplotlib import pyplot as plt
-
 from PIL import Image
 
 import os
-
-import random
 
 # 디바이스 식별
 
@@ -118,13 +114,3 @@ for epoch in range(training_epochs):
     torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch+1))
 
 print('Learning Finished!')
-
-# 테스트
-
-transform=transforms.Compose([transforms.Resize((64,64)),transforms.Grayscale(1),transforms.ToTensor()])
-
-with torch.no_grad():
-    test_img=Image.open('./test.jpg')
-    test_img=transform(test_img).to(device)
-    test_result=model(test_img.unsqueeze(0))
-    print(test_result)
