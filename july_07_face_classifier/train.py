@@ -28,11 +28,11 @@ class CustomDataset(Dataset):
 
         # face_data_dir 아래의 모든 파일 목록인 face_data_list
 
-        self.face_data_list=[face_data_dir+'/'+file_name for file_name in os.listdir(face_data_dir)]
+        self.face_data_list=[face_data_dir+file_name for file_name in os.listdir(face_data_dir)]
         
         # nonface_data_dir 아래의 모든 파일 목록인 nonface_data_list
         
-        self.nonface_data_list=[nonface_data_dir+'/'+file_name for file_name in os.listdir(nonface_data_dir)]
+        self.nonface_data_list=[nonface_data_dir+file_name for file_name in os.listdir(nonface_data_dir)]
         self.transform=transforms.Compose([transforms.Resize((64,64)),transforms.Grayscale(1),transforms.ToTensor()])
     def __len__(self):
 
@@ -55,13 +55,13 @@ class CustomDataset(Dataset):
         
 # 트레이닝 데이터 로드
 
-batch_size=100
-train_data=CustomDataset('./face_data/train_data/face','./face_data/train_data/nonface')
+batch_size=64
+train_data=CustomDataset('./face_data/train_data/face/','./face_data/train_data/nonface/')
 train_set=DataLoader(train_data,batch_size=batch_size,shuffle=True)
 
 # 테스트 데이터 로드
 
-test_data=CustomDataset('./face_data/test_data/face','./face_data/test_data/nonface')
+test_data=CustomDataset('./face_data/test_data/face/','./face_data/test_data/nonface/')
 test_set=DataLoader(test_data,len(test_data),shuffle=True)
 
 # 트레이닝
@@ -77,7 +77,7 @@ class CNN(nn.Module):
             nn.Conv2d(32,64,3,1,1),
             nn.ReLU(),
             nn.MaxPool2d(2,2))
-        self.fc=nn.Linear(16*16*64,2)
+        self.fc=nn.Linear(16*16*64,1)
         nn.init.xavier_uniform_(self.fc.weight)
     def forward(self,x):
         out=self.layer1(x)
@@ -87,10 +87,10 @@ class CNN(nn.Module):
         return out
 
 learning_rate=0.01
-training_epochs=1
+training_epochs=80
 
 model=CNN().to(device)
-criterion=nn.CrossEntropyLoss().to(device)
+criterion=nn.MSELoss().to(device)
 optimizer=optim.Adam(model.parameters(),learning_rate)
 
 total_batch=len(train_set)
@@ -115,36 +115,16 @@ for epoch in range(training_epochs):
 
     # 학습 데이터 저장
 
-    torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch))
+    torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch+1))
 
 print('Learning Finished!')
 
 # 테스트
 
+transform=transforms.Compose([transforms.Resize((64,64)),transforms.Grayscale(1),transforms.ToTensor()])
+
 with torch.no_grad():
-    for imgs,label in test_set:
-        imgs=imgs.to(device)
-        label=label.to(device)
-
-        prediction=model(imgs)
-        correct_prediction=torch.argmax(prediction,1)==label
-        accuracy=correct_prediction.float().mean()
-        
-        print('Accuracy',accuracy.item())
-
-        r=random.randint(0,len(imgs)-4)
-        X_single_data=imgs[r:r+5].view(-1,64*64).float()
-        Y_single_data=label[r:r+5]
-        
-        single_prediction=model(imgs[r:r+5])
-
-        print('Label: ',Y_single_data)
-        print('Prediction: ',torch.argmax(single_prediction,1))
-
-        fig,(ax0,ax1,ax2,ax3,ax4)=plt.subplots(1,5)
-        ax0.imshow(imgs[r:r+1].view(64,64),cmap='gray')
-        ax1.imshow(imgs[r+1:r+2].view(64,64),cmap='gray')
-        ax2.imshow(imgs[r+2:r+3].view(64,64),cmap='gray')
-        ax3.imshow(imgs[r+3:r+4].view(64,64),cmap='gray')
-        ax4.imshow(imgs[r+4:r+5].view(64,64),cmap='gray')
-        plt.show()
+    test_img=Image.open('./test.jpg')
+    test_img=transform(test_img).to(device)
+    test_result=model(test_img.unsqueeze(0))
+    print(test_result)
