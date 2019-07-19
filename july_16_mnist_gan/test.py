@@ -9,7 +9,7 @@ if __name__=='__main__':
 
     # 네트워크 데이터 로드
 
-    load_net='./g_net_epoch_10.pth'
+    load_net='./g_net_epoch_80.pth'
     net.load_state_dict(torch.load(load_net))
 
     with torch.no_grad():
