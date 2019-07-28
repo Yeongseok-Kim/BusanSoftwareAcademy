@@ -90,27 +90,29 @@ criterion=nn.MSELoss().to(device)
 optimizer=optim.Adam(model.parameters(),learning_rate)
 
 total_batch=len(train_set)
-print('Learning started. It takes sometime.')
 
-for epoch in range(training_epochs):
-    avg_cost=0
+if __name__=='__main__':
+    print('Learning started. It takes sometime.')
     
-    for X,Y in train_set:
-        X=X.to(device)
-        Y=Y.to(device)
+    for epoch in range(training_epochs):
+        avg_cost=0
+        
+        for X,Y in train_set:
+            X=X.to(device)
+            Y=Y.to(device)
 
-        optimizer.zero_grad()
-        hypothesis=model(X)
-        cost=criterion(hypothesis,Y)
-        cost.backward()
-        optimizer.step()
+            optimizer.zero_grad()
+            hypothesis=model(X)
+            cost=criterion(hypothesis,Y)
+            cost.backward()
+            optimizer.step()
 
-        avg_cost=cost/total_batch
+            avg_cost=cost/total_batch
+
+        print('[Epoch: {:>4}] cost={:>.9}'.format(epoch+1,avg_cost))
+        
+        # 학습 데이터 저장
+        
+        torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch+1))
     
-    print('[Epoch: {:>4}] cost={:>.9}'.format(epoch+1,avg_cost))
-
-    # 학습 데이터 저장
-
-    torch.save(model.state_dict(),'./model_epoch_%d.pth'%(epoch+1))
-
-print('Learning Finished!')
+    print('Learning Finished!')
